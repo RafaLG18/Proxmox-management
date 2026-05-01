@@ -1,0 +1,28 @@
+# Copie este arquivo para terraform.tfvars e preencha com seus valores
+# cp terraform.tfvars.example terraform.tfvars
+
+proxmox_endpoint  = "https://192.168.1.10:8006/"
+proxmox_api_token = "terraform@pve!mytoken=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+proxmox_insecure  = true
+
+proxmox_host            = "192.168.1.10"
+proxmox_ssh_user        = "root"
+proxmox_ssh_port        = 22
+proxmox_ssh_private_key = "~/.ssh/id_ed25519"
+
+proxmox_node   = "pve"
+iso_datastore  = "local"
+disk_datastore = "local-lvm"
+network_bridge = "vmbr0"
+
+template_name  = "ubuntu-24.04-template"
+template_vmid  = 9000
+cpu_cores      = 2
+memory_mb      = 2048
+disk_size_gb   = 20
+
+cloud_init_user = "ubuntu"
+cloud_init_ssh_keys = [
+  "ssh-ed25519 AAAAC3... seu-comentario",
+]
+# cloud_init_password = "sua-senha"  # opcional
