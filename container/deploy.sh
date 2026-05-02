@@ -51,21 +51,30 @@ case "$CMD" in
 
   plan)
     log "Gerando plano de execução..."
-    terraform plan
+    terraform plan -out=tfplan
+    log "Plano salvo. Execute './deploy.sh apply' para aplicar."
     ;;
 
   apply)
-    log "Aplicando configuração..."
-    terraform apply -auto-approve
+    [[ ! -f "tfplan" ]] && die "Nenhum plano encontrado. Execute './deploy.sh plan' primeiro."
+    log "Aplicando plano..."
+    terraform apply tfplan
+    rm -f tfplan
     log "Deploy concluído."
     terraform output
     ;;
 
   destroy)
     warn "Isso irá remover o container e o template LXC do Proxmox."
-    read -rp "Tem certeza? Digite 'yes' para confirmar: " confirm
-    [[ "$confirm" == "yes" ]] || die "Operação cancelada."
-    terraform destroy -auto-approve
+    log "Gerando plano de destruição..."
+    terraform plan -destroy -out=tfplan-destroy
+    read -rp "Revise o plano acima. Digite 'yes' para confirmar: " confirm
+    if [[ "$confirm" != "yes" ]]; then
+      rm -f tfplan-destroy
+      die "Operação cancelada."
+    fi
+    terraform apply tfplan-destroy
+    rm -f tfplan-destroy
     log "Recursos removidos."
     ;;
 

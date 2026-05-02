@@ -117,7 +117,7 @@ TF_VAR_container_gateway="192.168.1.1"
 ./deploy.sh plan
 ```
 
-Verifique os recursos que serão criados antes de aplicar.
+O plano é salvo no arquivo `tfplan`. Revise os recursos que serão criados antes de prosseguir.
 
 ### 7. Aplique
 
@@ -125,7 +125,7 @@ Verifique os recursos que serão criados antes de aplicar.
 ./deploy.sh apply
 ```
 
-Ao final, os outputs mostrarão o ID e IP do container criado.
+O `apply` exige que `./deploy.sh plan` tenha sido executado antes — ele aplica exatamente o `tfplan` gerado, sem aprovação interativa adicional. Ao final, os outputs mostrarão o ID e IP do container criado.
 
 ### 8. Acesse o container
 
@@ -166,7 +166,7 @@ pct enter <id-do-container>
 
 | Variável | Descrição | Padrão |
 |---|---|---|
-| `container_id` | ID do container LXC | `100` |
+| `container_id` | ID do container LXC. Se não informado, usa o próximo VMID disponível | `null` (auto) |
 | `container_hostname` | Hostname do container | `ubuntu-container` |
 | `container_tags` | Tags do container | `["ubuntu", "24.04", "terraform"]` |
 | `feature_nesting` | Habilitar nesting (necessário para rodar Docker) | `false` |
@@ -211,3 +211,5 @@ pct enter <id-do-container>
 ```bash
 ./deploy.sh destroy
 ```
+
+O comando exibe o plano de destruição antes de solicitar confirmação. Digite `yes` para confirmar.

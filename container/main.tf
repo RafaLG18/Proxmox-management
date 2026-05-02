@@ -42,8 +42,6 @@ resource "proxmox_download_file" "ubuntu_lxc_template" {
 }
 
 resource "proxmox_virtual_environment_container" "container" {
-  depends_on = [proxmox_download_file.ubuntu_lxc_template]
-
   node_name = var.proxmox_node
   vm_id     = var.container_id
 
@@ -126,9 +124,8 @@ resource "proxmox_virtual_environment_container" "container" {
         "usermod -aG sudo ${var.container_user}",
         "echo '${var.container_user} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${var.container_user}",
         "chmod 440 /etc/sudoers.d/${var.container_user}",
-        "sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config",
-        "sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
-        "sed -i 's/^#*MaxAuthTries.*/MaxAuthTries 3/' /etc/ssh/sshd_config",
+        "printf 'PasswordAuthentication no\\nPermitRootLogin prohibit-password\\nMaxAuthTries 3\\n' > /etc/ssh/sshd_config.d/99-hardening.conf",
+        "chmod 600 /etc/ssh/sshd_config.d/99-hardening.conf",
         "systemctl restart ssh",
       ]
     )

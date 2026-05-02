@@ -68,9 +68,10 @@ variable "network_bridge" {
 # --- Container ---
 
 variable "container_id" {
-  description = "ID do container LXC"
+  description = "ID do container LXC. Se não informado, usa o próximo VMID disponível no Proxmox"
   type        = number
-  default     = 100
+  default     = null
+  nullable    = true
 }
 
 variable "container_hostname" {
