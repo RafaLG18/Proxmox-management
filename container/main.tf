@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.77"
+      version = ">= 0.77"
     }
   }
 }
@@ -32,6 +32,9 @@ resource "proxmox_download_file" "ubuntu_lxc_template" {
   url       = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
   file_name = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 
+  checksum_algorithm = "sha512"
+  checksum           = "45c2978e6b97fe292ada95fe06834276015e5739a594db4de2fdfd830fa0c37942e8ae118fc1e32ffd9154b3f9378b592738b668ea3957db41f2907b86f219de"
+
   overwrite           = false
   overwrite_unmanaged = true
 }
@@ -46,7 +49,7 @@ resource "proxmox_virtual_environment_container" "container" {
   tags        = var.container_tags
 
   started    = true
-  unprivileged = var.unprivileged
+  unprivileged = true
 
   initialization {
     hostname = var.container_hostname
@@ -64,8 +67,7 @@ resource "proxmox_virtual_environment_container" "container" {
     }
 
     user_account {
-      keys     = var.ssh_keys
-      password = var.root_password
+      keys = var.ssh_keys
     }
   }
 
@@ -96,5 +98,33 @@ resource "proxmox_virtual_environment_container" "container" {
 
   features {
     nesting = var.feature_nesting
+    keyctl  = false
+    fuse    = false
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = split("/", var.container_ip)[0]
+    private_key = file(var.proxmox_ssh_private_key)
+  }
+
+  provisioner "remote-exec" {
+    inline = concat(
+      [
+        "useradd -m -s /bin/bash ${var.container_user}",
+        "mkdir -p /home/${var.container_user}/.ssh",
+        "chmod 700 /home/${var.container_user}/.ssh",
+        "touch /home/${var.container_user}/.ssh/authorized_keys",
+      ],
+      [for key in var.user_ssh_keys : "echo '${key}' >> /home/${var.container_user}/.ssh/authorized_keys"],
+      [
+        "chmod 600 /home/${var.container_user}/.ssh/authorized_keys",
+        "chown -R ${var.container_user}:${var.container_user} /home/${var.container_user}/.ssh",
+        "usermod -aG sudo ${var.container_user}",
+        "echo '${var.container_user} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${var.container_user}",
+        "chmod 440 /etc/sudoers.d/${var.container_user}",
+      ]
+    )
   }
 }

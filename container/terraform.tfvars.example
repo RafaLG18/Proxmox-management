@@ -18,21 +18,26 @@ network_bridge = "vmbr0"
 container_id       = 100
 container_hostname = "ubuntu-container"
 container_tags     = ["ubuntu", "24.04", "terraform"]
-unprivileged       = true
 feature_nesting    = false
 
-# IP fixo: container_ip = "192.168.1.100/24" e container_gateway = "192.168.1.1"
-container_ip = "dhcp"
-# container_gateway = "192.168.1.1"
-dns_servers = ["1.1.1.1", "8.8.8.8"]
-# dns_domain  = "home.lab"
+# Obrigatório usar IP fixo para o remote-exec funcionar
+container_ip     = "192.168.1.100/24"
+container_gateway = "192.168.1.1"
+dns_servers      = ["1.1.1.1", "8.8.8.8"]
+# dns_domain     = "home.lab"
 
 cpu_cores    = 1
 memory_mb    = 512
 swap_mb      = 512
 disk_size_gb = 8
 
+# ssh_keys: chave pública do root (deve corresponder a proxmox_ssh_private_key)
 ssh_keys = [
   "ssh-ed25519 AAAAC3... seu-comentario",
 ]
-# root_password = "sua-senha-root"
+
+# Usuário não-root criado via remote-exec
+container_user = "seu-usuario"
+user_ssh_keys = [
+  "ssh-ed25519 AAAAC3... seu-comentario",
+]

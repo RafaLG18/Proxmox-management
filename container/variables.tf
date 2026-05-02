@@ -85,12 +85,6 @@ variable "container_tags" {
   default     = ["ubuntu", "24.04", "terraform"]
 }
 
-variable "unprivileged" {
-  description = "Criar container sem privilégios (recomendado)"
-  type        = bool
-  default     = true
-}
-
 variable "feature_nesting" {
   description = "Habilitar nesting (necessário para Docker dentro do container)"
   type        = bool
@@ -152,14 +146,32 @@ variable "disk_size_gb" {
 # --- Acesso ---
 
 variable "ssh_keys" {
-  description = "Lista de chaves SSH públicas para o root do container"
+  description = "Chaves SSH públicas do root (deve conter a chave pública correspondente a proxmox_ssh_private_key para o remote-exec funcionar)"
   type        = list(string)
-  default     = []
+
+  validation {
+    condition     = length(var.ssh_keys) > 0
+    error_message = "Pelo menos uma chave SSH deve ser fornecida para o root."
+  }
 }
 
-variable "root_password" {
-  description = "Senha do root do container"
+variable "container_user" {
+  description = "Nome do usuário não-root a ser criado no container"
   type        = string
-  sensitive   = true
-  default     = null
+
+  validation {
+    condition     = can(regex("^[a-z_][a-z0-9_-]{0,31}$", var.container_user))
+    error_message = "Nome de usuário inválido. Use apenas letras minúsculas, números, hífen ou underscore (máx. 32 caracteres)."
+  }
 }
+
+variable "user_ssh_keys" {
+  description = "Chaves SSH públicas autorizadas para o container_user"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.user_ssh_keys) > 0
+    error_message = "Pelo menos uma chave SSH deve ser fornecida para o usuário do container."
+  }
+}
+
