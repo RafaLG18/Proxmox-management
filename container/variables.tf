@@ -94,15 +94,23 @@ variable "feature_nesting" {
 # --- Rede do Container ---
 
 variable "container_ip" {
-  description = "IP do container com máscara CIDR (ex: 192.168.1.100/24) ou 'dhcp'"
+  description = "IP do container com máscara CIDR (ex: 192.168.1.100/24) — DHCP não é suportado"
   type        = string
-  default     = "dhcp"
+
+  validation {
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$", var.container_ip))
+    error_message = "O IP deve estar no formato CIDR (ex: 192.168.1.100/24). DHCP não é suportado."
+  }
 }
 
 variable "container_gateway" {
-  description = "Gateway padrão do container (deixe null se usar dhcp)"
+  description = "Gateway padrão do container (ex: 192.168.1.1)"
   type        = string
-  default     = null
+
+  validation {
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}$", var.container_gateway))
+    error_message = "O gateway deve ser um endereço IPv4 válido (ex: 192.168.1.1)."
+  }
 }
 
 variable "dns_servers" {

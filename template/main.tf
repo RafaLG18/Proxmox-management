@@ -1,8 +1,10 @@
 terraform {
+  required_version = ">= 1.5.0"
+
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.77"
+      version = "~> 0.104"
     }
   }
 }
@@ -29,8 +31,8 @@ resource "proxmox_download_file" "ubuntu_cloud_image" {
   datastore_id = var.iso_datastore
   node_name    = var.proxmox_node
 
-  url       = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
-  file_name = "noble-server-cloudimg-amd64.img"
+  url       = var.cloud_image_url
+  file_name = var.cloud_image_filename
 
   overwrite            = false
   overwrite_unmanaged  = true

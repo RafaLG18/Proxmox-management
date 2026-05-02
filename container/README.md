@@ -16,7 +16,10 @@ Código Terraform para criar um container LXC Ubuntu 24.04 LTS no Proxmox VE com
 - Usuário não-root criado automaticamente com sudo sem senha
 - Features `keyctl` e `fuse` explicitamente desabilitadas
 - Checksum SHA-512 verificado no download do template
-- IP fixo obrigatório (necessário para o `remote-exec` funcionar)
+- Download do template via HTTPS
+- SSH hardening aplicado via `remote-exec`: `PasswordAuthentication no`, `PermitRootLogin prohibit-password`, `MaxAuthTries 3`
+- IP fixo obrigatório com validação de formato CIDR
+- Gateway obrigatório com validação de formato IPv4
 
 ## Estrutura
 
@@ -33,7 +36,8 @@ Código Terraform para criar um container LXC Ubuntu 24.04 LTS no Proxmox VE com
 
 ## Pré-requisitos
 
-- Terraform >= 1.3
+- Terraform >= 1.3 (validado via `required_version`)
+- Provider bpg/proxmox `~> 0.104`
 - Proxmox VE >= 8.0
 - API Token com as permissões corretas (veja [PERMISSIONS.md](../PERMISSIONS.md))
 - Chave SSH configurada para acesso ao nó Proxmox
