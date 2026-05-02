@@ -23,7 +23,7 @@ Código Terraform para criar um template de VM Ubuntu 24.04 LTS (Noble Numbat) n
 
 ## Pré-requisitos
 
-- Terraform >= 1.3
+- Terraform >= 1.5
 - Proxmox VE >= 8.0
 - API Token com as permissões corretas (veja [PERMISSIONS.md](../PERMISSIONS.md))
 - Chave SSH configurada para acesso ao nó Proxmox
@@ -83,7 +83,7 @@ Verifique os recursos que serão criados antes de aplicar.
 ./deploy.sh apply
 ```
 
-Ao final, os outputs mostrarão o ID e nome do template criado.
+O script exibirá o plano de execução e pedirá confirmação antes de aplicar. Ao final, os outputs mostrarão o ID e nome do template criado.
 
 ### 6. Clone o template
 
@@ -138,6 +138,13 @@ resource "proxmox_virtual_environment_vm" "minha_vm" {
 | `cpu_cores` | Número de cores de CPU | `2` |
 | `memory_mb` | Memória RAM em MB | `2048` |
 | `disk_size_gb` | Tamanho do disco em GB | `20` |
+
+### Cloud image
+
+| Variável | Descrição | Padrão |
+|---|---|---|
+| `cloud_image_url` | URL da imagem cloud a ser baixada para o Proxmox | URL oficial Ubuntu 24.04 |
+| `cloud_image_filename` | Nome do arquivo da imagem no datastore | `noble-server-cloudimg-amd64.img` |
 
 ### Cloud-init
 

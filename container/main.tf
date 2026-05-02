@@ -1,8 +1,10 @@
 terraform {
+  required_version = ">= 1.3"
+
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = ">= 0.77"
+      version = "~> 0.104"
     }
   }
 }
@@ -29,7 +31,7 @@ resource "proxmox_download_file" "ubuntu_lxc_template" {
   datastore_id = var.iso_datastore
   node_name    = var.proxmox_node
 
-  url       = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+  url       = "https://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
   file_name = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 
   checksum_algorithm = "sha512"
@@ -40,8 +42,6 @@ resource "proxmox_download_file" "ubuntu_lxc_template" {
 }
 
 resource "proxmox_virtual_environment_container" "container" {
-  depends_on = [proxmox_download_file.ubuntu_lxc_template]
-
   node_name = var.proxmox_node
   vm_id     = var.container_id
 
@@ -124,6 +124,9 @@ resource "proxmox_virtual_environment_container" "container" {
         "usermod -aG sudo ${var.container_user}",
         "echo '${var.container_user} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${var.container_user}",
         "chmod 440 /etc/sudoers.d/${var.container_user}",
+        "printf 'PasswordAuthentication no\\nPermitRootLogin prohibit-password\\nMaxAuthTries 3\\n' > /etc/ssh/sshd_config.d/99-hardening.conf",
+        "chmod 600 /etc/ssh/sshd_config.d/99-hardening.conf",
+        "systemctl restart ssh",
       ]
     )
   }

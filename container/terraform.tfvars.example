@@ -15,7 +15,7 @@ iso_datastore  = "local"
 disk_datastore = "local-lvm"
 network_bridge = "vmbr0"
 
-container_id       = 100
+# container_id     = 100  # opcional: se omitido, usa o próximo VMID disponível
 container_hostname = "ubuntu-container"
 container_tags     = ["ubuntu", "24.04", "terraform"]
 feature_nesting    = false

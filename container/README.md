@@ -16,7 +16,10 @@ Código Terraform para criar um container LXC Ubuntu 24.04 LTS no Proxmox VE com
 - Usuário não-root criado automaticamente com sudo sem senha
 - Features `keyctl` e `fuse` explicitamente desabilitadas
 - Checksum SHA-512 verificado no download do template
-- IP fixo obrigatório (necessário para o `remote-exec` funcionar)
+- Download do template via HTTPS
+- SSH hardening aplicado via `remote-exec`: `PasswordAuthentication no`, `PermitRootLogin prohibit-password`, `MaxAuthTries 3`
+- IP fixo obrigatório com validação de formato CIDR
+- Gateway obrigatório com validação de formato IPv4
 
 ## Estrutura
 
@@ -33,7 +36,8 @@ Código Terraform para criar um container LXC Ubuntu 24.04 LTS no Proxmox VE com
 
 ## Pré-requisitos
 
-- Terraform >= 1.3
+- Terraform >= 1.3 (validado via `required_version`)
+- Provider bpg/proxmox `~> 0.104`
 - Proxmox VE >= 8.0
 - API Token com as permissões corretas (veja [PERMISSIONS.md](../PERMISSIONS.md))
 - Chave SSH configurada para acesso ao nó Proxmox
@@ -113,7 +117,7 @@ TF_VAR_container_gateway="192.168.1.1"
 ./deploy.sh plan
 ```
 
-Verifique os recursos que serão criados antes de aplicar.
+O plano é salvo no arquivo `tfplan`. Revise os recursos que serão criados antes de prosseguir.
 
 ### 7. Aplique
 
@@ -121,7 +125,7 @@ Verifique os recursos que serão criados antes de aplicar.
 ./deploy.sh apply
 ```
 
-Ao final, os outputs mostrarão o ID e IP do container criado.
+O `apply` exige que `./deploy.sh plan` tenha sido executado antes — ele aplica exatamente o `tfplan` gerado, sem aprovação interativa adicional. Ao final, os outputs mostrarão o ID e IP do container criado.
 
 ### 8. Acesse o container
 
@@ -162,7 +166,7 @@ pct enter <id-do-container>
 
 | Variável | Descrição | Padrão |
 |---|---|---|
-| `container_id` | ID do container LXC | `100` |
+| `container_id` | ID do container LXC. Se não informado, usa o próximo VMID disponível | `null` (auto) |
 | `container_hostname` | Hostname do container | `ubuntu-container` |
 | `container_tags` | Tags do container | `["ubuntu", "24.04", "terraform"]` |
 | `feature_nesting` | Habilitar nesting (necessário para rodar Docker) | `false` |
@@ -207,3 +211,5 @@ pct enter <id-do-container>
 ```bash
 ./deploy.sh destroy
 ```
+
+O comando exibe o plano de destruição antes de solicitar confirmação. Digite `yes` para confirmar.

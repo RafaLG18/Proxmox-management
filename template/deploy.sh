@@ -55,8 +55,16 @@ case "$CMD" in
     ;;
 
   apply)
+    log "Gerando plano de execução..."
+    terraform plan -out=tfplan
+    read -rp "Deseja aplicar o plano acima? Digite 'yes' para confirmar: " confirm
+    if [[ "$confirm" != "yes" ]]; then
+      rm -f tfplan
+      die "Operação cancelada."
+    fi
     log "Aplicando configuração..."
-    terraform apply -auto-approve
+    terraform apply tfplan
+    rm -f tfplan
     log "Deploy concluído."
     terraform output
     ;;

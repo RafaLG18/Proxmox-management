@@ -21,6 +21,9 @@ cpu_cores      = 2
 memory_mb      = 2048
 disk_size_gb   = 20
 
+cloud_image_url      = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+cloud_image_filename = "noble-server-cloudimg-amd64.img"
+
 cloud_init_user = "ubuntu"
 cloud_init_ssh_keys = [
   "ssh-ed25519 AAAAC3... seu-comentario",
