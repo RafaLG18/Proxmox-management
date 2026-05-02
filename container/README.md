@@ -83,12 +83,23 @@ TF_VAR_user_ssh_keys='["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOc4k2e5KgOFohimVuoo
 
 ### 4. Configure a rede
 
-IP fixo é obrigatório — DHCP não é suportado pois o `remote-exec` precisa de um endereço conhecido para conectar:
+IP fixo é obrigatório — o `remote-exec` precisa de um endereço conhecido para conectar ao container após a criação:
 
 ```bash
 TF_VAR_container_ip="192.168.1.100/24"
 TF_VAR_container_gateway="192.168.1.1"
 ```
+
+> **Por que DHCP não funciona com este código?**
+>
+> O `remote-exec` do Terraform precisa do IP do container no momento do `apply`. Com DHCP, o IP só existe depois que o container sobe — e o Terraform não tem como descobri-lo nativamente durante a execução.
+>
+> Contornar isso exigiria uma arquitetura em dois estágios: criar o container, consultar o IP via SSH no host Proxmox (`pct exec <id> -- hostname -I`), salvar em arquivo temporário e usá-lo num `null_resource` separado. Essa abordagem tem problemas sérios:
+> - O plan falha na primeira execução porque o arquivo com o IP ainda não existe
+> - Cria estado fora do Terraform (arquivo temporário)
+> - É frágil para `terraform destroy` e re-apply
+>
+> Se DHCP for um requisito, a recomendação é separar as responsabilidades: usar o Terraform apenas para criar o container e delegar o provisionamento interno (criação de usuário, SSH, etc.) a uma ferramenta como **Ansible**, executada após o `terraform apply` com o IP já disponível.
 
 ### 5. Inicialize o Terraform
 
